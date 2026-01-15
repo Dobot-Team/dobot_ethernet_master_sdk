@@ -84,7 +84,8 @@ typedef struct {
 /**
  * @brief 初始化接口
  */
-ETHERNET_MASTER_API void MasterHandlerInit(ServoConfig config);
+ETHERNET_MASTER_API void MasterHandlerInit(ServoConfig config,
+                                           double intervalMs);
 
 /**
  * @brief 启动通讯线程
