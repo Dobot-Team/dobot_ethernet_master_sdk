@@ -28,6 +28,29 @@ typedef struct {
 } ServoConfig;
 
 /**
+ * @brief 换算参数
+ * 人形
+ * double pos = ±650.0,       // rad
+  double vel = ±600.0,       // rad/s
+  double torque = ±300.0,    // Nm
+  double posGain = 1000.0,  // 0.1Nm/rad
+  double velGain = 100.0    // 0.1Nm/rad/s
+ * 四足
+  double pos = ±12.56637,       // rad
+  double vel = ±80.0,       // rad/s
+  double torque = ±150.0,    // Nm
+  double posGain = 500.0,  // 0.1Nm/rad
+  double velGain = 50.0    // 0.1Nm/rad/s
+ */
+typedef struct {
+  double maxPosition;      // rad
+  double maxVelocity;      // rad/s
+  double maxTorque;        // Nm
+  double maxPositionGain;  // 位置增益最大值
+  double maxVelocityGain;  // 速度增益最大值
+} AxisConversionConfig;
+
+/**
  * @brief 伺服运控指令
  */
 typedef struct {
@@ -84,7 +107,9 @@ typedef struct {
 /**
  * @brief 初始化接口
  */
-ETHERNET_MASTER_API void MasterHandlerInit(ServoConfig config);
+ETHERNET_MASTER_API void MasterHandlerInit(
+    ServoConfig config, AxisConversionConfig conversionConfig,
+    double intervalMs);
 
 /**
  * @brief 启动通讯线程
