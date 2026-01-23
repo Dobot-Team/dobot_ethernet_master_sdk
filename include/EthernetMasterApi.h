@@ -107,9 +107,10 @@ typedef struct {
 /**
  * @brief 初始化接口
  */
-ETHERNET_MASTER_API void MasterHandlerInit(
+ETHERNET_MASTER_API bool MasterHandlerInit(
     ServoConfig config, AxisConversionConfig conversionConfig,
-    double intervalMs);
+    double intervalMs, const char* targetIp, uint16_t targetPort,
+    const char* networkInterface);
 
 /**
  * @brief 启动通讯线程
@@ -126,7 +127,7 @@ ETHERNET_MASTER_API void MasterCmd(const LowerCmd* cmd);
  * @brief 获取伺服反馈状态
  * @note 线程安全：是（内部已做双缓冲）
  */
-ETHERNET_MASTER_API void MasterState(LowerState* out_state);
+ETHERNET_MASTER_API void MasterState(LowerState* state);
 
 /**
  * @brief 停止通讯
