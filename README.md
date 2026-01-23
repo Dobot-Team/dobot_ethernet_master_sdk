@@ -76,7 +76,15 @@ int main() {
     conversionConfig.maxVelocityGain = 100.0;
     
     // 3. 初始化 Master（通讯周期为 1.0ms）
-    MasterHandlerInit(config, conversionConfig, 1.0);
+    const char* targetIp = "192.168.8.234";      // 目标IP地址
+    uint16_t targetPort = 5000;                  // 目标端口
+    const char* networkInterface = "eth0";      // 网络接口名称
+    
+    if (!MasterHandlerInit(config, conversionConfig, 1.0, 
+                           targetIp, targetPort, networkInterface)) {
+        std::cerr << "MasterHandler 初始化失败" << std::endl;
+        return -1;
+    }
     
     // 4. 启动通讯
     MasterStart();
@@ -235,7 +243,8 @@ A: 设置 `LD_LIBRARY_PATH` 环境变量，或使用 `rpath` 在编译时指定�
 
 ### 初始化与启动
 
-- `MasterHandlerInit()` - 初始化 Master 处理器
+- `MasterHandlerInit()` - 初始化 Master 处理器（返回 bool 表示是否成功）
+  - 参数：`ServoConfig`, `AxisConversionConfig`, `intervalMs`, `targetIp`, `targetPort`, `networkInterface`
 - `MasterStart()` - 启动通讯线程
 
 ### 数据交互
