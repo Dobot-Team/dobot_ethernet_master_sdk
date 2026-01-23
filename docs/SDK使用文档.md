@@ -190,7 +190,7 @@ include/EthernetMasterApi.h
    - `LowerCmd`：所有电机控制命令集合
    - `LowerState`：所有电机反馈状态集合
 2. **API 函数声明**：
-   - `MasterHandlerInit()`：初始化函数（需要三个参数）
+   - `MasterHandlerInit()`：初始化函数（需要六个参数，返回 bool 表示是否成功）
    - `MasterStart()`：启动通讯
    - `MasterCmd()`：发送控制命令
    - `MasterState()`：获取反馈状态
@@ -478,7 +478,15 @@ int main() {
     */
 
     // 3. 初始化 Master（通讯周期为 1.0ms）
-    MasterHandlerInit(config, conversionConfig, 1.0);
+    const char* targetIp = "192.168.8.234";      // 目标IP地址
+    uint16_t targetPort = 5000;                  // 目标端口
+    const char* networkInterface = "eth0";      // 网络接口名称（如 "eth0", "eth1" 等）
+    
+    if (!MasterHandlerInit(config, conversionConfig, 1.0, 
+                           targetIp, targetPort, networkInterface)) {
+        std::cerr << "MasterHandler 初始化失败" << std::endl;
+        return -1;
+    }
     
     // 4. 启动通讯
     MasterStart();
@@ -548,7 +556,15 @@ int main() {
     conversionConfig.maxVelocityGain = 100.0;
 
     // 3. 初始化 Master（通讯周期为 1.0ms）
-    MasterHandlerInit(config, conversionConfig, 1.0);
+    const char* targetIp = "192.168.8.234";      // 目标IP地址
+    uint16_t targetPort = 5000;                  // 目标端口
+    const char* networkInterface = "eth0";      // 网络接口名称
+    
+    if (!MasterHandlerInit(config, conversionConfig, 1.0, 
+                           targetIp, targetPort, networkInterface)) {
+        fprintf(stderr, "MasterHandler 初始化失败\n");
+        return -1;
+    }
     
     // 4. 启动通讯
     MasterStart();
@@ -813,17 +829,69 @@ AxisConversionConfig conversionConfig;
   - 建议使用默认值 `1.0`，除非有特殊需求
   - 过小的值可能导致系统无法及时响应
 
+### Q10: 如何配置网络参数（targetIp、targetPort、networkInterface）？
+
+**问题**：`MasterHandlerInit` 需要提供网络参数，如何正确配置？
+
+**解答**：
+
+1. **targetIp（目标IP地址）**：
+   - 下位机的 IP 地址，例如：`"192.168.8.234"`
+   - 必须是有效的 IPv4 地址字符串
+   - 确保与下位机在同一网络段
+
+2. **targetPort（目标端口）**：
+   - 下位机的 UDP 端口号，例如：`5000`
+   - 范围：1-65535
+   - 必须与下位机配置的端口一致
+
+3. **networkInterface（网络接口）**：
+   - 用于发送 UDP 数据包的网络接口名称
+   - 常见值：`"eth0"`、`"eth1"`、`"wlan0"` 等
+   - 查看可用接口：`ip addr show` 或 `ifconfig`
+   - 选择连接到下位机的网络接口
+
+**配置示例**：
+
+```cpp
+// 查看网络接口
+// 在终端执行：ip addr show 或 ifconfig
+
+// 示例配置
+const char* targetIp = "192.168.8.234";      // 下位机IP
+uint16_t targetPort = 5000;                  // 下位机端口
+const char* networkInterface = "eth0";       // 网络接口
+
+if (!MasterHandlerInit(config, conversionConfig, 1.0, 
+                       targetIp, targetPort, networkInterface)) {
+    std::cerr << "初始化失败" << std::endl;
+    return -1;
+}
+```
+
+**常见问题**：
+- **初始化返回 false**：检查 IP 地址格式、端口范围、网络接口是否存在
+- **无法通讯**：确认网络接口正确，IP 地址可达（使用 `ping` 测试）
+- **找不到网络接口**：使用 `ip addr show` 查看系统可用的网络接口名称
+
 ---
 
 ## API 详细说明
 
 ### MasterHandlerInit
 
-初始化 Master 处理器，配置伺服参数和标幺转换参数。
+初始化 Master 处理器，配置伺服参数、标幺转换参数和网络通讯参数。
 
 **函数签名**：
 ```c
-void MasterHandlerInit(ServoConfig config, AxisConversionConfig conversionConfig, double intervalMs);
+bool MasterHandlerInit(
+    ServoConfig config, 
+    AxisConversionConfig conversionConfig, 
+    double intervalMs, 
+    const char* targetIp, 
+    uint16_t targetPort, 
+    const char* networkInterface
+);
 ```
 
 **参数说明**：
@@ -839,11 +907,36 @@ void MasterHandlerInit(ServoConfig config, AxisConversionConfig conversionConfig
   - `maxPositionGain`：位置增益最大值，用于位置增益的标幺换算
   - `maxVelocityGain`：速度增益最大值，用于速度增益的标幺换算
 - `intervalMs`：通讯周期（毫秒），通常设置为 1.0（1ms 周期，1000Hz 频率）
+- `targetIp`：目标 IP 地址（字符串），下位机的 IP 地址，例如 `"192.168.8.234"`
+- `targetPort`：目标端口号（uint16_t），下位机的 UDP 端口，例如 `5000`
+- `networkInterface`：网络接口名称（字符串），用于发送 UDP 数据包的网络接口，例如 `"eth0"`、`"eth1"` 等
+
+**返回值**：
+- `true`：初始化成功
+- `false`：初始化失败（参数无效或配置错误）
 
 **说明**：
 - 必须在调用其他 API 之前调用
 - 只能调用一次，重复调用可能导致未定义行为
 - 不同项目类型（人形/四足）需要配置不同的 `conversionConfig` 参数
+- 如果返回 `false`，请检查错误信息并修正参数后重试
+- `targetIp` 和 `networkInterface` 不能为 `NULL`，否则会返回 `false`
+
+**使用示例**：
+
+```cpp
+// 配置网络参数
+const char* targetIp = "192.168.8.234";      // 下位机IP地址
+uint16_t targetPort = 5000;                  // 下位机端口
+const char* networkInterface = "eth0";       // 网络接口
+
+// 初始化并检查返回值
+if (!MasterHandlerInit(config, conversionConfig, 1.0, 
+                       targetIp, targetPort, networkInterface)) {
+    std::cerr << "初始化失败，请检查参数配置" << std::endl;
+    return -1;
+}
+```
 
 **配置示例**：
 
@@ -871,13 +964,13 @@ quadrupedConfig.maxVelocityGain = 50.0;   // 50.0 (0.1Nm/rad/s)
 
 ### API 快速参考
 
-| 函数名 | 功能 | 参数 | 线程安全 |
-|--------|------|------|----------|
-| `MasterHandlerInit()` | 初始化 | `ServoConfig`, `AxisConversionConfig`, `double intervalMs` | ❌ |
-| `MasterStart()` | 启动通讯 | 无 | ❌ |
-| `MasterCmd()` | 发送命令 | `const LowerCmd*` | ✅ |
-| `MasterState()` | 获取状态 | `LowerState*` | ✅ |
-| `MasterStop()` | 停止通讯 | 无 | ❌ |
+| 函数名 | 功能 | 参数 | 返回值 | 线程安全 |
+|--------|------|------|--------|----------|
+| `MasterHandlerInit()` | 初始化 | `ServoConfig`, `AxisConversionConfig`, `double intervalMs`, `const char* targetIp`, `uint16_t targetPort`, `const char* networkInterface` | `bool` | ❌ |
+| `MasterStart()` | 启动通讯 | 无 | `void` | ❌ |
+| `MasterCmd()` | 发送命令 | `const LowerCmd*` | `void` | ✅ |
+| `MasterState()` | 获取状态 | `LowerState*` | `void` | ✅ |
+| `MasterStop()` | 停止通讯 | 无 | `void` | ❌ |
 
 ### 数据结构详细说明
 
