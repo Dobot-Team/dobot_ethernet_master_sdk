@@ -478,9 +478,9 @@ int main() {
     */
 
     // 3. 初始化 Master（通讯周期为 1.0ms）
-    const char* targetIp = "192.168.8.234";      // 目标IP地址
-    uint16_t targetPort = 5000;                  // 目标端口
-    const char* networkInterface = "eth0";      // 网络接口名称（如 "eth0", "eth1" 等）
+    const char* targetIp = "172.16.20.32";      // 目标IP地址
+    uint16_t targetPort = 12345;                  // 目标端口
+    const char* networkInterface = "eth1";      // 网络接口名称（如 "eth0", "eth1" 等）
     
     if (!MasterHandlerInit(config, conversionConfig, 1.0, 
                            targetIp, targetPort, networkInterface)) {
@@ -556,9 +556,9 @@ int main() {
     conversionConfig.maxVelocityGain = 100.0;
 
     // 3. 初始化 Master（通讯周期为 1.0ms）
-    const char* targetIp = "192.168.8.234";      // 目标IP地址
-    uint16_t targetPort = 5000;                  // 目标端口
-    const char* networkInterface = "eth0";      // 网络接口名称
+    const char* targetIp = "172.16.20.32";      // 目标IP地址
+    uint16_t targetPort = 12345;                  // 目标端口
+    const char* networkInterface = "eth1";      // 网络接口名称（如 "eth0", "eth1" 等）
     
     if (!MasterHandlerInit(config, conversionConfig, 1.0, 
                            targetIp, targetPort, networkInterface)) {
@@ -836,12 +836,12 @@ AxisConversionConfig conversionConfig;
 **解答**：
 
 1. **targetIp（目标IP地址）**：
-   - 下位机的 IP 地址，例如：`"192.168.8.234"`
+   - 下位机的 IP 地址，例如：`"172.16.20.32"`
    - 必须是有效的 IPv4 地址字符串
    - 确保与下位机在同一网络段
 
 2. **targetPort（目标端口）**：
-   - 下位机的 UDP 端口号，例如：`5000`
+   - 下位机的 UDP 端口号，例如：`12345`
    - 范围：1-65535
    - 必须与下位机配置的端口一致
 
@@ -858,8 +858,8 @@ AxisConversionConfig conversionConfig;
 // 在终端执行：ip addr show 或 ifconfig
 
 // 示例配置
-const char* targetIp = "192.168.8.234";      // 下位机IP
-uint16_t targetPort = 5000;                  // 下位机端口
+const char* targetIp = "172.16.20.32";      // 下位机IP
+uint16_t targetPort = 12345;                  // 下位机端口
 const char* networkInterface = "eth0";       // 网络接口
 
 if (!MasterHandlerInit(config, conversionConfig, 1.0, 
@@ -907,8 +907,8 @@ bool MasterHandlerInit(
   - `maxPositionGain`：位置增益最大值，用于位置增益的标幺换算
   - `maxVelocityGain`：速度增益最大值，用于速度增益的标幺换算
 - `intervalMs`：通讯周期（毫秒），通常设置为 1.0（1ms 周期，1000Hz 频率）
-- `targetIp`：目标 IP 地址（字符串），下位机的 IP 地址，例如 `"192.168.8.234"`
-- `targetPort`：目标端口号（uint16_t），下位机的 UDP 端口，例如 `5000`
+- `targetIp`：目标 IP 地址（字符串），下位机的 IP 地址，例如 `"172.16.20.32"`
+- `targetPort`：目标端口号（uint16_t），下位机的 UDP 端口，例如 `12345`
 - `networkInterface`：网络接口名称（字符串），用于发送 UDP 数据包的网络接口，例如 `"eth0"`、`"eth1"` 等
 
 **返回值**：
@@ -926,8 +926,8 @@ bool MasterHandlerInit(
 
 ```cpp
 // 配置网络参数
-const char* targetIp = "192.168.8.234";      // 下位机IP地址
-uint16_t targetPort = 5000;                  // 下位机端口
+const char* targetIp = "172.16.20.32";      // 下位机IP地址
+uint16_t targetPort = 12345;                  // 下位机端口
 const char* networkInterface = "eth0";       // 网络接口
 
 // 初始化并检查返回值
