@@ -190,7 +190,7 @@ include/EthernetMasterApi.h
    - `LowerCmd`：所有电机控制命令集合
    - `LowerState`：所有电机反馈状态集合
 2. **API 函数声明**：
-   - `MasterHandlerInit()`：初始化函数（需要六个参数，返回 bool 表示是否成功）
+   - `MasterHandlerInit()`：初始化函数（需要七个参数，返回 bool 表示是否成功）
    - `MasterStart()`：启动通讯
    - `MasterCmd()`：发送控制命令
    - `MasterState()`：获取反馈状态
@@ -483,7 +483,7 @@ int main() {
     const char* networkInterface = "eth1";      // 网络接口名称（如 "eth0", "eth1" 等）
     
     if (!MasterHandlerInit(config, conversionConfig, 1.0, 
-                           targetIp, targetPort, networkInterface)) {
+                           targetIp, targetPort, networkInterface, RobotType::kHuman)) {
         std::cerr << "MasterHandler 初始化失败" << std::endl;
         return -1;
     }
@@ -561,7 +561,7 @@ int main() {
     const char* networkInterface = "eth1";      // 网络接口名称（如 "eth0", "eth1" 等）
     
     if (!MasterHandlerInit(config, conversionConfig, 1.0, 
-                           targetIp, targetPort, networkInterface)) {
+                           targetIp, targetPort, networkInterface, RobotType::kHuman)) {
         fprintf(stderr, "MasterHandler 初始化失败\n");
         return -1;
     }
@@ -890,7 +890,8 @@ bool MasterHandlerInit(
     double intervalMs, 
     const char* targetIp, 
     uint16_t targetPort, 
-    const char* networkInterface
+    const char* networkInterface,
+    RobotType type
 );
 ```
 
@@ -932,7 +933,7 @@ const char* networkInterface = "eth0";       // 网络接口
 
 // 初始化并检查返回值
 if (!MasterHandlerInit(config, conversionConfig, 1.0, 
-                       targetIp, targetPort, networkInterface)) {
+                       targetIp, targetPort, networkInterface, RobotType::kHuman)) {
     std::cerr << "初始化失败，请检查参数配置" << std::endl;
     return -1;
 }
@@ -966,7 +967,7 @@ quadrupedConfig.maxVelocityGain = 50.0;   // 50.0 (0.1Nm/rad/s)
 
 | 函数名 | 功能 | 参数 | 返回值 | 线程安全 |
 |--------|------|------|--------|----------|
-| `MasterHandlerInit()` | 初始化 | `ServoConfig`, `AxisConversionConfig`, `double intervalMs`, `const char* targetIp`, `uint16_t targetPort`, `const char* networkInterface` | `bool` | ❌ |
+| `MasterHandlerInit()` | 初始化 | `ServoConfig`, `AxisConversionConfig`, `double intervalMs`, `const char* targetIp`, `uint16_t targetPort`, `const char* networkInterface`,`RobotType::kHuman` | `bool` | ❌ |
 | `MasterStart()` | 启动通讯 | 无 | `void` | ❌ |
 | `MasterCmd()` | 发送命令 | `const LowerCmd*` | `void` | ✅ |
 | `MasterState()` | 获取状态 | `LowerState*` | `void` | ✅ |

@@ -50,6 +50,11 @@ typedef struct {
   double maxVelocityGain;  // 速度增益最大值
 } AxisConversionConfig;
 
+enum RobotType {
+  kHuman = 0,  // 人形
+  kDog = 1     // 狗
+};
+
 /**
  * @brief 伺服运控指令
  */
@@ -92,6 +97,7 @@ typedef struct {
   bool enableCmd[ETHERNET_MASTER_MAX_MOTOR_NUM];
   bool resetCmd[ETHERNET_MASTER_MAX_MOTOR_NUM];
   bool caliCmd[ETHERNET_MASTER_MAX_MOTOR_NUM];
+  bool caliDirection[ETHERNET_MASTER_MAX_MOTOR_NUM];  // 0-正限位 1-负限位
   bool homingCmd[ETHERNET_MASTER_MAX_MOTOR_NUM];
 } LowerCmd;
 
@@ -110,7 +116,7 @@ typedef struct {
 ETHERNET_MASTER_API bool MasterHandlerInit(
     ServoConfig config, AxisConversionConfig conversionConfig,
     double intervalMs, const char* targetIp, uint16_t targetPort,
-    const char* networkInterface);
+    const char* networkInterface, RobotType type);
 
 /**
  * @brief 启动通讯线程
