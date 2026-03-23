@@ -189,6 +189,7 @@ include/EthernetMasterApi.h
    - `MotorState`：单个电机反馈状态
    - `LowerCmd`：所有电机控制命令集合
    - `LowerState`：所有电机反馈状态集合
+   - `RobotType`：机器人类型枚举（`kHuman` / `kDog`）
 2. **API 函数声明**：
    - `MasterHandlerInit()`：初始化函数（需要七个参数，返回 bool 表示是否成功）
    - `MasterStart()`：启动通讯
@@ -561,7 +562,7 @@ int main() {
     const char* networkInterface = "eth1";      // 网络接口名称（如 "eth0", "eth1" 等）
     
     if (!MasterHandlerInit(config, conversionConfig, 1.0, 
-                           targetIp, targetPort, networkInterface, RobotType::kHuman)) {
+                           targetIp, targetPort, networkInterface, kHuman)) {
         fprintf(stderr, "MasterHandler 初始化失败\n");
         return -1;
     }
@@ -863,7 +864,7 @@ uint16_t targetPort = 12345;                  // 下位机端口
 const char* networkInterface = "eth0";       // 网络接口
 
 if (!MasterHandlerInit(config, conversionConfig, 1.0, 
-                       targetIp, targetPort, networkInterface)) {
+                       targetIp, targetPort, networkInterface, kHuman)) {
     std::cerr << "初始化失败" << std::endl;
     return -1;
 }
@@ -911,6 +912,7 @@ bool MasterHandlerInit(
 - `targetIp`：目标 IP 地址（字符串），下位机的 IP 地址，例如 `"172.16.20.32"`
 - `targetPort`：目标端口号（uint16_t），下位机的 UDP 端口，例如 `12345`
 - `networkInterface`：网络接口名称（字符串），用于发送 UDP 数据包的网络接口，例如 `"eth0"`、`"eth1"` 等
+- `type`：机器人类型枚举（`kHuman` 或 `kDog`）
 
 **返回值**：
 - `true`：初始化成功
@@ -967,7 +969,7 @@ quadrupedConfig.maxVelocityGain = 50.0;   // 50.0 (0.1Nm/rad/s)
 
 | 函数名 | 功能 | 参数 | 返回值 | 线程安全 |
 |--------|------|------|--------|----------|
-| `MasterHandlerInit()` | 初始化 | `ServoConfig`, `AxisConversionConfig`, `double intervalMs`, `const char* targetIp`, `uint16_t targetPort`, `const char* networkInterface`,`RobotType::kHuman` | `bool` | ❌ |
+| `MasterHandlerInit()` | 初始化 | `ServoConfig`, `AxisConversionConfig`, `double intervalMs`, `const char* targetIp`, `uint16_t targetPort`, `const char* networkInterface`, `RobotType type` | `bool` | ❌ |
 | `MasterStart()` | 启动通讯 | 无 | `void` | ❌ |
 | `MasterCmd()` | 发送命令 | `const LowerCmd*` | `void` | ✅ |
 | `MasterState()` | 获取状态 | `LowerState*` | `void` | ✅ |
@@ -1023,6 +1025,17 @@ typedef struct {
 | 人形项目 | 650.0 rad | 600.0 rad/s | 300.0 Nm | 1000.0 | 100.0 |
 | 四足项目 | 12.56637 rad | 80.0 rad/s | 150.0 Nm | 500.0 | 50.0 |
 
+#### RobotType
+
+机器人类型枚举，用于 `MasterHandlerInit` 的 `type` 参数。
+
+```c
+enum RobotType {
+  kHuman = 0,  // 人形
+  kDog = 1     // 四足
+};
+```
+
 #### MotorCmd
 
 单个电机的控制命令。
@@ -1073,6 +1086,7 @@ typedef struct {
     bool enableCmd[ETHERNET_MASTER_MAX_MOTOR_NUM];     // 使能命令
     bool resetCmd[ETHERNET_MASTER_MAX_MOTOR_NUM];      // 复位命令
     bool caliCmd[ETHERNET_MASTER_MAX_MOTOR_NUM];       // 校准命令
+    bool caliDirection[ETHERNET_MASTER_MAX_MOTOR_NUM]; // 校准方向，0-正限位 1-负限位
     bool homingCmd[ETHERNET_MASTER_MAX_MOTOR_NUM];     // 回零命令
 } LowerCmd;
 ```
@@ -1093,6 +1107,7 @@ typedef struct {
 |--------|------|----------|
 | `ServoConfig` | 伺服结构配置 | 初始化时配置电机基本参数 |
 | `AxisConversionConfig` | 伺服数据换算配置 | 初始化时配置标幺换算参数 |
+| `RobotType` | 机器人类型枚举 | 初始化时选择机器人类型 |
 | `MotorCmd` | 单个电机控制命令 | 控制单个电机 |
 | `MotorState` | 单个电机反馈状态 | 获取单个电机状态 |
 | `LowerCmd` | 所有电机控制命令 | 发送所有电机控制命令 |
