@@ -98,6 +98,7 @@ typedef struct {
   bool resetCmd[ETHERNET_MASTER_MAX_MOTOR_NUM];
   bool caliCmd[ETHERNET_MASTER_MAX_MOTOR_NUM];
   bool caliDirection[ETHERNET_MASTER_MAX_MOTOR_NUM];  // 0-正限位 1-负限位
+  RobotType caliMode[ETHERNET_MASTER_MAX_MOTOR_NUM];
   bool homingCmd[ETHERNET_MASTER_MAX_MOTOR_NUM];
 } LowerCmd;
 
