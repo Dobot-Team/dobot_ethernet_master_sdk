@@ -1087,6 +1087,7 @@ typedef struct {
     bool resetCmd[ETHERNET_MASTER_MAX_MOTOR_NUM];      // 复位命令
     bool caliCmd[ETHERNET_MASTER_MAX_MOTOR_NUM];       // 校准命令
     bool caliDirection[ETHERNET_MASTER_MAX_MOTOR_NUM]; // 校准方向，0-正限位 1-负限位
+    RobotType caliMode[ETHERNET_MASTER_MAX_MOTOR_NUM]; // 校准模式（kHuman/kDog），按电机动态配置
     bool homingCmd[ETHERNET_MASTER_MAX_MOTOR_NUM];     // 回零命令
 } LowerCmd;
 ```

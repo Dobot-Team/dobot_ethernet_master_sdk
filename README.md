@@ -97,6 +97,10 @@ int main() {
     cmd.motor_cmd[0].kp = 50.0;
     cmd.motor_cmd[0].kd = 3.0;
     cmd.enableCmd[0] = true;
+    // 可选：对电机 0 进行一次人形模式的校准
+    cmd.caliCmd[0] = false;          // 本周期是否触发校准
+    cmd.caliDirection[0] = false;    // 0=正限位, 1=负限位
+    cmd.caliMode[0] = kHuman;        // 当前电机按照人形参数进行标定
     MasterCmd(&cmd);
     
     // 6. 获取反馈状态
