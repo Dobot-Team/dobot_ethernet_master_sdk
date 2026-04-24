@@ -80,6 +80,7 @@ typedef struct {
   float q_raw;
   float dq_raw;
   float ddq_raw;
+  float tau_cmd_feedback;  // 关节力矩指令反馈（Nm）
   uint8_t mcu_temp;
   uint8_t mos_temp;
   uint8_t motor_temp;
