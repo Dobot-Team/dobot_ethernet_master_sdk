@@ -466,6 +466,7 @@ int main() {
     conversionConfig.maxPosition = 650.0;      // 最大位置：±650.0 rad
     conversionConfig.maxVelocity = 600.0;      // 最大速度：±600.0 rad/s
     conversionConfig.maxTorque = 300.0;        // 最大力矩：±300.0 Nm
+    conversionConfig.maxCurrent = 200.0;       // 最大电流：±200.0 A
     conversionConfig.maxPositionGain = 1000.0; // 位置增益最大值：1000.0 (0.1Nm/rad)
     conversionConfig.maxVelocityGain = 100.0;  // 速度增益最大值：100.0 (0.1Nm/rad/s)
     
@@ -474,6 +475,7 @@ int main() {
     conversionConfig.maxPosition = 12.56637;   // 最大位置：±12.56637 rad (约±2π)
     conversionConfig.maxVelocity = 80.0;        // 最大速度：±80.0 rad/s
     conversionConfig.maxTorque = 150.0;         // 最大力矩：±150.0 Nm
+    conversionConfig.maxCurrent = 200.0;        // 最大电流：±200.0 A
     conversionConfig.maxPositionGain = 500.0;   // 位置增益最大值：500.0 (0.1Nm/rad)
     conversionConfig.maxVelocityGain = 50.0;    // 速度增益最大值：50.0 (0.1Nm/rad/s)
     */
@@ -776,6 +778,7 @@ ldd lib/aarch64/libethernet_master.so
 | `maxPosition` | 650.0 rad | 12.56637 rad | 人形项目需要更大的位置范围 |
 | `maxVelocity` | 600.0 rad/s | 80.0 rad/s | 人形项目需要更高的速度 |
 | `maxTorque` | 300.0 Nm | 150.0 Nm | 人形项目需要更大的力矩 |
+| `maxCurrent` | 200.0 A | 200.0 A | 电流换算量程，按驱动器实际能力配置 |
 | `maxPositionGain` | 1000.0 | 500.0 | 人形项目需要更高的位置增益 |
 | `maxVelocityGain` | 100.0 | 50.0 | 人形项目需要更高的速度增益 |
 
@@ -795,6 +798,7 @@ AxisConversionConfig conversionConfig;
     conversionConfig.maxPosition = 650.0;
     conversionConfig.maxVelocity = 600.0;
     conversionConfig.maxTorque = 300.0;
+    conversionConfig.maxCurrent = 200.0;
     conversionConfig.maxPositionGain = 1000.0;
     conversionConfig.maxVelocityGain = 100.0;
 #elif defined(QUADRUPED_PROJECT)
@@ -802,6 +806,7 @@ AxisConversionConfig conversionConfig;
     conversionConfig.maxPosition = 12.56637;
     conversionConfig.maxVelocity = 80.0;
     conversionConfig.maxTorque = 150.0;
+    conversionConfig.maxCurrent = 200.0;
     conversionConfig.maxPositionGain = 500.0;
     conversionConfig.maxVelocityGain = 50.0;
 #else
@@ -809,6 +814,7 @@ AxisConversionConfig conversionConfig;
     conversionConfig.maxPosition = 100.0;  // 根据实际需求调整
     conversionConfig.maxVelocity = 100.0;
     conversionConfig.maxTorque = 200.0;
+    conversionConfig.maxCurrent = 200.0;
     conversionConfig.maxPositionGain = 800.0;
     conversionConfig.maxVelocityGain = 80.0;
 #endif
@@ -906,6 +912,7 @@ bool MasterHandlerInit(
   - `maxPosition`：最大位置值（rad），用于位置数据的标幺换算
   - `maxVelocity`：最大速度值（rad/s），用于速度数据的标幺换算
   - `maxTorque`：最大力矩值（Nm），用于力矩数据的标幺换算
+  - `maxCurrent`：最大电流值（A），用于电流数据的标幺换算
   - `maxPositionGain`：位置增益最大值，用于位置增益的标幺换算
   - `maxVelocityGain`：速度增益最大值，用于速度增益的标幺换算
 - `intervalMs`：通讯周期（毫秒），通常设置为 1.0（1ms 周期，1000Hz 频率）
@@ -949,6 +956,7 @@ AxisConversionConfig humanoidConfig;
 humanoidConfig.maxPosition = 650.0;      // ±650.0 rad
 humanoidConfig.maxVelocity = 600.0;      // ±600.0 rad/s
 humanoidConfig.maxTorque = 300.0;       // ±300.0 Nm
+humanoidConfig.maxCurrent = 200.0;      // ±200.0 A
 humanoidConfig.maxPositionGain = 1000.0; // 1000.0 (0.1Nm/rad)
 humanoidConfig.maxVelocityGain = 100.0;   // 100.0 (0.1Nm/rad/s)
 
@@ -957,6 +965,7 @@ AxisConversionConfig quadrupedConfig;
 quadrupedConfig.maxPosition = 12.56637;  // ±12.56637 rad (约±2π)
 quadrupedConfig.maxVelocity = 80.0;       // ±80.0 rad/s
 quadrupedConfig.maxTorque = 150.0;       // ±150.0 Nm
+quadrupedConfig.maxCurrent = 200.0;      // ±200.0 A
 quadrupedConfig.maxPositionGain = 500.0;  // 500.0 (0.1Nm/rad)
 quadrupedConfig.maxVelocityGain = 50.0;   // 50.0 (0.1Nm/rad/s)
 ```
@@ -1006,6 +1015,7 @@ typedef struct {
     double maxPosition;      // 最大位置（rad）
     double maxVelocity;      // 最大速度（rad/s）
     double maxTorque;        // 最大力矩（Nm）
+    double maxCurrent;       // 最大电流（A）
     double maxPositionGain;  // 位置增益最大值
     double maxVelocityGain;  // 速度增益最大值
 } AxisConversionConfig;
@@ -1015,15 +1025,16 @@ typedef struct {
 - `maxPosition`：位置数据的最大值（rad），用于位置命令和反馈的标幺换算
 - `maxVelocity`：速度数据的最大值（rad/s），用于速度命令和反馈的标幺换算
 - `maxTorque`：力矩数据的最大值（Nm），用于力矩命令和反馈的标幺换算
+- `maxCurrent`：电流数据的最大值（A），用于电流反馈和电流指令的标幺换算
 - `maxPositionGain`：位置增益的最大值，用于位置增益的标幺换算（单位：0.1Nm/rad）
 - `maxVelocityGain`：速度增益的最大值，用于速度增益的标幺换算（单位：0.1Nm/rad/s）
 
 **项目配置参考**：
 
-| 项目类型 | maxPosition | maxVelocity | maxTorque | maxPositionGain | maxVelocityGain |
-|---------|------------|-------------|-----------|----------------|----------------|
-| 人形项目 | 650.0 rad | 600.0 rad/s | 300.0 Nm | 1000.0 | 100.0 |
-| 四足项目 | 12.56637 rad | 80.0 rad/s | 150.0 Nm | 500.0 | 50.0 |
+| 项目类型 | maxPosition | maxVelocity | maxTorque | maxCurrent | maxPositionGain | maxVelocityGain |
+|---------|------------|-------------|-----------|-----------|----------------|----------------|
+| 人形项目 | 650.0 rad | 600.0 rad/s | 300.0 Nm | 200.0 A | 1000.0 | 100.0 |
+| 四足项目 | 12.56637 rad | 80.0 rad/s | 150.0 Nm | 200.0 A | 500.0 | 50.0 |
 
 #### RobotType
 

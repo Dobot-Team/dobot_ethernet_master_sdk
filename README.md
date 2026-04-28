@@ -72,6 +72,7 @@ int main() {
     conversionConfig.maxPosition = 650.0;
     conversionConfig.maxVelocity = 600.0;
     conversionConfig.maxTorque = 300.0;
+    conversionConfig.maxCurrent = 200.0;
     conversionConfig.maxPositionGain = 1000.0;
     conversionConfig.maxVelocityGain = 100.0;
     
@@ -243,6 +244,15 @@ A: 设置 `LD_LIBRARY_PATH` 环境变量，或使用 `rpath` 在编译时指定�
 更多问题请参考 [详细文档](docs/SDK使用文档.md) 中的常见问题章节。
 
 ## 📝 API 概览
+
+### AxisConversionConfig 参数说明
+
+- `maxPosition`：位置标幺值换算上限（rad）
+- `maxVelocity`：速度标幺值换算上限（rad/s）
+- `maxTorque`：转矩标幺值换算上限（Nm）
+- `maxCurrent`：电流标幺值换算上限（A）
+- `maxPositionGain`：位置增益换算上限
+- `maxVelocityGain`：速度增益换算上限
 
 ### 初始化与启动
 

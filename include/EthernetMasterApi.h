@@ -33,12 +33,14 @@ typedef struct {
  * double pos = ±650.0,       // rad
   double vel = ±600.0,       // rad/s
   double torque = ±300.0,    // Nm
+  double current = ±200.0,   // A
   double posGain = 1000.0,  // 0.1Nm/rad
   double velGain = 100.0    // 0.1Nm/rad/s
  * 四足
   double pos = ±12.56637,       // rad
   double vel = ±80.0,       // rad/s
   double torque = ±150.0,    // Nm
+  double current = ±200.0,   // A
   double posGain = 500.0,  // 0.1Nm/rad
   double velGain = 50.0    // 0.1Nm/rad/s
  */
@@ -46,6 +48,7 @@ typedef struct {
   double maxPosition;      // rad
   double maxVelocity;      // rad/s
   double maxTorque;        // Nm
+  double maxCurrent;       // A
   double maxPositionGain;  // 位置增益最大值
   double maxVelocityGain;  // 速度增益最大值
 } AxisConversionConfig;
@@ -87,6 +90,9 @@ typedef struct {
   bool is_virtual;
   uint16_t error_code;
   uint16_t version;
+  float tau_cmd;
+  float current_feedback; 
+  float current_cmd;
 } MotorState;
 
 /**
