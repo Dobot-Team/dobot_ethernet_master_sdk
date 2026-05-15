@@ -3,28 +3,33 @@
 [![License](https://img.shields.io/badge/license-Proprietary-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Linux-lightgrey.svg)](https://www.linux.org/)
 
-Ethernet Master SDK 是一个用于通过以太网（UDP）与下位机进行实时通讯的 C/C++ 动态链接库。该 SDK 提供了完整的伺服电机控制接口，支持最多 30 个电机的同步控制。
+Ethernet Master SDK 提供与下位机实时通讯的 C/C++ 动态链接库，主要包括：
+- **伺服主站**：`EthernetMasterApi.h` + `libethernet_master.so`，完整的伺服电机控制接口（最多 30 轴）。
+- **UDP 桥接**：`UdpMasterApi.h` + `libudp_master.so`，对外提供 `UdpMasterInit` / `UdpMasterStart` / `UdpMasterStop`（内部固定单线程模式），便于上位机进程拉起 UDP 数据通路。
 
 ## ✨ 主要特性
 
-- ✅ **多电机支持**：最多支持 30 个伺服电机同时控制
+- ✅ **多电机支持**：最多支持 30 个伺服电机同时控制（`libethernet_master.so`）
 - ✅ **实时通讯**：1ms 通讯周期，低延迟、高可靠性
 - ✅ **线程安全**：采用双缓冲机制，确保多线程环境下的数据一致性
 - ✅ **C 接口**：提供纯 C 接口，兼容 C/C++ 项目
 - ✅ **动态链接**：以 `.so` 动态库形式提供，便于集成
-- ✅ **多架构支持**：提供 x86_64 和 aarch64 两种架构的库文件
+- ✅ **多架构支持**：`libethernet_master.so` 与 `libudp_master.so` 均提供 x86_64 和 aarch64 两种架构的库文件
 
 ## 📦 SDK 目录结构
 
 ```
 ethernet-master-sdk/
 ├── include/                    # 头文件目录
-│   └── EthernetMasterApi.h    # SDK 对外 API 头文件
+│   ├── EthernetMasterApi.h    # 伺服主站对外 API
+│   └── UdpMasterApi.h         # UDP 通讯对外 API
 ├── lib/                        # 库文件目录
 │   ├── x86_64/                 # x86_64 架构库文件
-│   │   └── libethernet_master.so
+│   │   ├── libethernet_master.so
+│   │   └── libudp_master.so
 │   └── aarch64/                # ARM 64位架构库文件
-│       └── libethernet_master.so
+│       ├── libethernet_master.so
+│       └── libudp_master.so
 ├── docs/                       # 文档目录
 │   └── SDK使用文档.md          # 详细使用文档
 └── README.md                   # 本文件
@@ -43,13 +48,14 @@ uname -m
 
 ```cpp
 #include "EthernetMasterApi.h"
+#include "UdpMasterApi.h"   // 若需通过动态库启动 UDP 通讯
 ```
 
 ### 3. 链接库文件
 
 根据系统架构选择对应的库文件：
-- **x86_64**：`lib/x86_64/libethernet_master.so`
-- **aarch64**：`lib/aarch64/libethernet_master.so`
+- **x86_64**：`lib/x86_64/libethernet_master.so`，按需增加 `lib/x86_64/libudp_master.so`
+- **aarch64**：`lib/aarch64/libethernet_master.so`，按需增加 `lib/aarch64/libudp_master.so`
 
 ### 4. 基本使用示例
 
@@ -155,6 +161,7 @@ target_include_directories(your_target PRIVATE
 # 链接库
 target_link_libraries(your_target PRIVATE
     ${ETHERNET_MASTER_SDK_LIB_DIR}/libethernet_master.so
+    ${ETHERNET_MASTER_SDK_LIB_DIR}/libudp_master.so
     pthread
     rt
 )
@@ -179,7 +186,7 @@ endif
 CXX = g++
 CXXFLAGS = -std=c++17 -Wall -O2
 INCLUDES = -I$(SDK_INCLUDE_DIR)
-LIBS = -L$(SDK_LIB_DIR) -lethernet_master -lpthread -lrt
+LIBS = -L$(SDK_LIB_DIR) -lethernet_master -ludp_master -lpthread -lrt
 ```
 
 ## 📚 文档
@@ -209,23 +216,24 @@ echo "System architecture: $ARCH"
 
 # 检查头文件
 ls -l include/EthernetMasterApi.h
+ls -l include/UdpMasterApi.h
 
 # 检查库文件
 ls -l lib/${ARCH}/libethernet_master.so
+ls -l lib/${ARCH}/libudp_master.so
 
 # 检查库依赖
 ldd lib/${ARCH}/libethernet_master.so
+ldd lib/${ARCH}/libudp_master.so
 
 # 检查导出符号
 nm -D lib/${ARCH}/libethernet_master.so | grep Master
+nm -D lib/${ARCH}/libudp_master.so | grep UdpMaster
 ```
 
-应该能看到以下导出函数：
-- `MasterHandlerInit`
-- `MasterStart`
-- `MasterCmd`
-- `MasterState`
-- `MasterStop`
+**伺服主站**应能看到导出函数：`MasterHandlerInit`、`MasterStart`、`MasterCmd`、`MasterState`、`MasterStop`。
+
+**UDP 库**应能看到：`UdpMasterInit`、`UdpMasterStart`、`UdpMasterStop`。
 
 ## ❓ 常见问题
 
@@ -245,7 +253,11 @@ A: 设置 `LD_LIBRARY_PATH` 环境变量，或使用 `rpath` 在编译时指定�
 
 ## 📝 API 概览
 
-### AxisConversionConfig 参数说明
+### Ethernet Master（EthernetMasterApi / libethernet_master）
+
+伺服主站相关接口与常用配置项。
+
+#### AxisConversionConfig 参数说明
 
 - `maxPosition`：位置标幺值换算上限（rad）
 - `maxVelocity`：速度标幺值换算上限（rad/s）
@@ -254,20 +266,42 @@ A: 设置 `LD_LIBRARY_PATH` 环境变量，或使用 `rpath` 在编译时指定�
 - `maxPositionGain`：位置增益换算上限
 - `maxVelocityGain`：速度增益换算上限
 
-### 初始化与启动
+#### MasterHandlerInit
 
-- `MasterHandlerInit()` - 初始化 Master 处理器（返回 bool 表示是否成功）
-  - 参数：`ServoConfig`, `AxisConversionConfig`, `intervalMs`, `targetIp`, `targetPort`, `networkInterface`,`RobotType`
-- `MasterStart()` - 启动通讯线程
+- 初始化 Master 处理器（返回 `bool` 表示是否成功）
+- 参数：`ServoConfig`, `AxisConversionConfig`, `intervalMs`, `targetIp`, `targetPort`, `networkInterface`, `RobotType`
 
-### 数据交互
+#### MasterStart
 
-- `MasterCmd()` - 下发伺服控制命令（线程安全）
-- `MasterState()` - 获取伺服反馈状态（线程安全）
+- 启动通讯线程（须在 `MasterHandlerInit` 成功之后调用）
 
-### 停止与清理
+#### MasterCmd
 
-- `MasterStop()` - 停止通讯线程并清理资源
+- 下发伺服控制命令（线程安全，内部双缓冲）
+
+#### MasterState
+
+- 获取伺服反馈状态（线程安全，内部双缓冲）
+
+#### MasterStop
+
+- 停止通讯线程并清理资源
+
+### UDP Master（UdpMasterApi / libudp_master）
+
+用于上位机侧通过动态库启动/停止 UDP 通讯；**不对外暴露线程模式**，内部固定为单线程（SingleThread）。
+
+#### UdpMasterInit
+
+- `UdpMasterInit(const char* targetIp, uint16_t targetPort)`：初始化 UDP（返回 `bool`）
+
+#### UdpMasterStart
+
+- 启动 UDP 通讯线程
+
+#### UdpMasterStop
+
+- 停止并释放资源
 
 详细 API 说明请参考 [详细文档](docs/SDK使用文档.md)。
 
